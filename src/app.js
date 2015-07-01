@@ -1,15 +1,14 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
 import 'babel/polyfill';
-import React from 'react';
 import FastClick from 'fastclick';
-import App from './components/App';
 import Dispatcher from './core/Dispatcher';
-import AppActions from './actions/AppActions';
 import ActionTypes from './constants/ActionTypes';
+import router from './router';
 
-let path = decodeURI(window.location.pathname);
-let onSetMeta = (name, content) => {
+const container = document.getElementById('app');
+
+const setMetaTag = (name, content) => {
   // Remove and create a new <meta /> tag in order to make it work
   // with bookmarks in Safari
   let elements = document.getElementsByTagName('meta');
@@ -25,38 +24,29 @@ let onSetMeta = (name, content) => {
 };
 
 function run() {
-  // Render the top-level React component
-  let props = {
-    path: path,
-    context: {
-      onSetTitle: value => document.title = value,
-      onSetMeta
-    }
-  };
-  let element = React.createElement(App, props);
-  React.render(element, document.getElementById('app'), () => {
-    let css = document.getElementById('css');
+  router.dispatch(window.location.pathname, container, ({ data }) => {
+    const css = document.getElementById('css');
     css.parentNode.removeChild(css);
+    document.title = data.title;
+    setMetaTag('description', data.description);
   });
 
-  // Update `Application.path` prop when `window.location` is changed
-  Dispatcher.register((action) => {
+  // Re-render application when `window.location` changes
+  Dispatcher.register(action => {
     if (action.type === ActionTypes.CHANGE_LOCATION) {
-      element = React.cloneElement(element, {path: action.path});
-      React.render(element, document.getElementById('app'));
+      router.dispatch(action.path, container, ({ data }) => {
+        document.title = data.title;
+        setMetaTag('description', data.description);
+      });
     }
   });
 }
 
-// Run the application when both DOM is ready
-// and page content is loaded
-Promise.all([
-  new Promise((resolve) => {
-    if (window.addEventListener) {
-      window.addEventListener('DOMContentLoaded', resolve);
-    } else {
-      window.attachEvent('onload', resolve);
-    }
-  }).then(() => FastClick.attach(document.body)),
-  new Promise((resolve) => AppActions.loadPage(path, resolve))
-]).then(run);
+// Run the application when DOM is ready
+new Promise(resolve => {
+  if (window.addEventListener) {
+    window.addEventListener('DOMContentLoaded', resolve);
+  } else {
+    window.attachEvent('onload', resolve);
+  }
+}).then(() => FastClick.attach(document.body)).then(run);

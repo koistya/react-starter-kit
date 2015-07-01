@@ -1,16 +1,21 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
 import React, { PropTypes } from 'react'; // eslint-disable-line no-unused-vars
-import invariant from '../../node_modules/react/lib/invariant';
-import { canUseDOM } from '../../node_modules/react/lib/ExecutionEnvironment';
+import invariant from 'react/lib/invariant';
+import emptyFunction from 'react/lib/emptyFunction';
+import { canUseDOM } from 'react/lib/ExecutionEnvironment';
 
 let count = 0;
 
 function withStyles(styles) {
   return (ComposedComponent) => class WithStyles {
 
-    static contextTypes = {
-      onInsertCss: PropTypes.func
+    static propTypes = {
+      onInsertCss: PropTypes.func.isRequired
+    };
+
+    static defaultProps = {
+      onInsertCss: emptyFunction
     };
 
     constructor() {
@@ -40,7 +45,7 @@ function withStyles(styles) {
             this.refCount++;
           }
         } else {
-          this.context.onInsertCss(css);
+          this.props.onInsertCss(css);
         }
       }.bind(this);
     }
@@ -50,7 +55,7 @@ function withStyles(styles) {
         invariant(styles.use, `The style-loader must be configured with reference-counted API.`);
         styles.use();
       } else {
-        this.context.onInsertCss(styles.toString());
+        this.props.onInsertCss(styles.toString());
       }
     }
 

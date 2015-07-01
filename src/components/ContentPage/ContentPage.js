@@ -13,12 +13,7 @@ class ContentPage {
     title: PropTypes.string
   };
 
-  static contextTypes = {
-    onSetTitle: PropTypes.func.isRequired
-  };
-
   render() {
-    this.context.onSetTitle(this.props.title);
     return (
       <div className="ContentPage">
         <div className="ContentPage-container">

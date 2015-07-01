@@ -8,8 +8,7 @@ import express from 'express';
 import React from 'react';
 import './core/Dispatcher';
 import './stores/AppStore';
-import db from './core/Database';
-import App from './components/App';
+import router from './router';
 
 const server = express();
 
@@ -19,7 +18,7 @@ server.use(express.static(path.join(__dirname, 'public')));
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-server.use('/api/query', require('./api/query'));
+server.use('/api/content', require('./api/content'));
 
 //
 // Register server-side rendering middleware
@@ -29,34 +28,18 @@ server.use('/api/query', require('./api/query'));
 const templateFile = path.join(__dirname, 'templates/index.html');
 const template = _.template(fs.readFileSync(templateFile, 'utf8'));
 
-server.get('*', async (req, res, next) => {
-  try {
-    // TODO: Temporary fix #159
-    if (['/', '/about', '/privacy'].indexOf(req.path) !== -1) {
-      await db.getPage(req.path);
+server.get('*', (req, res, next) => {
+  router.dispatch(req.path, state => {
+    try {
+      const data = state.data;
+      data.title = data.title || '';
+      data.description = data.description || '';
+      const html = template(data);
+      res.status(state.statusCode).send(html);
+    } catch (err) {
+      next(err);
     }
-    let notFound = false;
-    let css = [];
-    let data = {description: ''};
-    let app = (<App
-      path={req.path}
-      context={{
-        onInsertCss: value => css.push(value),
-        onSetTitle: value => data.title = value,
-        onSetMeta: (key, value) => data[key] = value,
-        onPageNotFound: () => notFound = true
-      }} />);
-
-    data.body = React.renderToString(app);
-    data.css = css.join('');
-    let html = template(data);
-    if (notFound) {
-      res.status(404);
-    }
-    res.send(html);
-  } catch (err) {
-    next(err);
-  }
+  });
 });
 
 //

@@ -1,23 +1,21 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
 import React from 'react';
-import styles from './LoginPage.less';
 import withStyles from '../../decorators/withStyles';
+import styles from './ErrorPage.less';
 
 @withStyles(styles)
-class LoginPage {
+class ErrorPage {
 
   render() {
     return (
-      <div className="LoginPage">
-        <div className="LoginPage-container">
-          <h1>Log In</h1>
-          <p>...</p>
-        </div>
+      <div>
+        <h1>Error</h1>
+        <p>Sorry, there is an error occurred.</p>
       </div>
     );
   }
 
 }
 
-export default LoginPage;
+export default ErrorPage;
