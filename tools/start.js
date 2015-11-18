@@ -11,11 +11,12 @@ import browserSync from 'browser-sync';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
+import webpackConfig from './webpack.config';
 import run from './run';
 
 global.WATCH = true;
-const webpackConfig = require('./webpack.config')[0]; // Client-side bundle configuration
-const bundler = webpack(webpackConfig);
+const clientBundleConfig = webpackConfig[0];
+const bundler = webpack(clientBundleConfig);
 
 /**
  * Launches a development web server with "live reload" functionality -
@@ -34,10 +35,10 @@ async function start() {
         webpackDevMiddleware(bundler, {
           // IMPORTANT: dev middleware can't access config, so we should
           // provide publicPath by ourselves
-          publicPath: webpackConfig.output.publicPath,
+          publicPath: clientBundleConfig.output.publicPath,
 
           // Pretty colored output
-          stats: webpackConfig.stats,
+          stats: clientBundleConfig.stats,
 
           // For other settings see
           // http://webpack.github.io/docs/webpack-dev-middleware.html

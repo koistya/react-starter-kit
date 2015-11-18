@@ -2,11 +2,10 @@
 
 import React, { Component, PropTypes } from 'react';
 import s from './RegisterPage.scss';
-import withStyles from '../../decorators/withStyles';
+import withStyles from '../withStyles';
 
 const title = 'New User Registration';
 
-@withStyles(s)
 class RegisterPage extends Component {
 
   static contextTypes = {
@@ -30,4 +29,4 @@ class RegisterPage extends Component {
 
 }
 
-export default RegisterPage;
+export default withStyles(RegisterPage, s);

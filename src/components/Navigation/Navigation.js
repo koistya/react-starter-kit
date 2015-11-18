@@ -3,10 +3,9 @@
 import React, { Component, PropTypes } from 'react';
 import cx from 'classnames';
 import s from './Navigation.scss';
-import withStyles from '../../decorators/withStyles';
+import withStyles from '../withStyles';
 import Link from '../Link';
 
-@withStyles(s)
 class Navigation extends Component {
 
   static propTypes = {
@@ -28,4 +27,4 @@ class Navigation extends Component {
 
 }
 
-export default Navigation;
+export default withStyles(Navigation, s);
