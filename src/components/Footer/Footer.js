@@ -13,11 +13,11 @@ class Footer extends Component {
         <div className={s.container}>
           <span className={s.text}>© Your Company</span>
           <span className={s.spacer}>·</span>
-          <a className={s.link} href="/" onClick={Link.handleClick}>Home</a>
+          <a className={s.link} href="/" onClick={Link.handleClick()}>Home</a>
           <span className={s.spacer}>·</span>
-          <a className={s.link} href="/privacy" onClick={Link.handleClick}>Privacy</a>
+          <a className={s.link} href="/privacy" onClick={Link.handleClick()}>Privacy</a>
           <span className={s.spacer}>·</span>
-          <a className={s.link} href="/not-found" onClick={Link.handleClick}>Not Found</a>
+          <a className={s.link} href="/not-found" onClick={Link.handleClick()}>Not Found</a>
         </div>
       </div>
     );

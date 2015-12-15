@@ -21,44 +21,46 @@ class Link extends Component {
     onClick: PropTypes.func,
   };
 
-  static handleClick = (event) => {
-    let allowTransition = true;
-    let clickResult;
+  static handleClick(event) {
+    return (event) => {
+      let allowTransition = true;
+      let clickResult;
 
-    if (this.props && this.props.onClick) {
-      clickResult = this.props.onClick(event);
-    }
-
-    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-      return;
-    }
-
-    if (clickResult === false || event.defaultPrevented === true) {
-      allowTransition = false;
-    }
-
-    event.preventDefault();
-
-    if (allowTransition) {
-      const link = event.currentTarget;
-      if (this.props && this.props.to) {
-        Location.push({
-          ...(parsePath(this.props.to)),
-          state: this.props && this.props.state || null,
-        });
-      } else {
-        Location.push({
-          pathname: link.pathname,
-          search: link.search,
-          state: this.props && this.props.state || null,
-        });
+      if (this.props && this.props.onClick) {
+        clickResult = this.props.onClick(event);
       }
-    }
-  };
+
+      if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+        return;
+      }
+
+      if (clickResult === false || event.defaultPrevented === true) {
+        allowTransition = false;
+      }
+
+      event.preventDefault();
+
+      if (allowTransition) {
+        const link = event.currentTarget;
+        if (this.props && this.props.to) {
+          Location.push({
+            ...(parsePath(this.props.to)),
+            state: this.props && this.props.state || null,
+          });
+        } else {
+          Location.push({
+            pathname: link.pathname,
+            search: link.search,
+            state: this.props && this.props.state || null,
+          });
+        }
+      }
+    };
+  }
 
   render() {
     const { to, query, ...props } = this.props;
-    return <a href={Location.createHref(to, query)} onClick={Link.handleClick.bind(this)} {...props} />;
+    return <a href={Location.createHref(to, query)} onClick={Link.handleClick()} {...props} />;
   }
 
 }

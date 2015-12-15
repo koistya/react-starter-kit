@@ -3,7 +3,6 @@
 import fs from 'fs';
 import { join } from 'path';
 import { Router } from 'express';
-import Promise from 'bluebird';
 import jade from 'jade';
 import fm from 'front-matter';
 
@@ -17,7 +16,13 @@ const parseJade = (path, jadeContent) => {
   return Object.assign({ path, content: htmlContent }, fmContent.attributes);
 };
 
-const readFile = Promise.promisify(fs.readFile);
+const readFile = filename => new Promise(resolve => {
+  fs.readFile(filename, 'utf8', (err, data) => {
+    if (err) throw err;
+    resolve(data);
+  });
+});
+
 const fileExists = filename => new Promise(resolve => {
   fs.exists(filename, resolve);
 });
@@ -41,7 +46,7 @@ router.get('/', async (req, res, next) => {
     if (!(await fileExists(fileName))) {
       res.status(404).send({ error: `The page '${path}' is not found.` });
     } else {
-      const source = await readFile(fileName, { encoding: 'utf8' });
+      const source = await readFile(fileName);
       const content = parseJade(path, source);
       res.status(200).send(content);
     }
