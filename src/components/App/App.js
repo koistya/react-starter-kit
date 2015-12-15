@@ -1,79 +1,59 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
-import React, { PropTypes } from 'react';
-import styles from './App.less';
-import withContext from '../../decorators/withContext';
-import withStyles from '../../decorators/withStyles';
-import AppActions from '../../actions/AppActions';
-import AppStore from '../../stores/AppStore';
+import React, { Component, PropTypes } from 'react';
+import emptyFunction from 'fbjs/lib/emptyFunction';
+import s from './App.scss';
 import Header from '../Header';
-import ContentPage from '../ContentPage';
-import ContactPage from '../ContactPage';
-import LoginPage from '../LoginPage';
-import RegisterPage from '../RegisterPage';
-import NotFoundPage from '../NotFoundPage';
 import Feedback from '../Feedback';
 import Footer from '../Footer';
 
-const pages = { ContentPage, ContactPage, LoginPage, RegisterPage, NotFoundPage };
-
-@withContext
-@withStyles(styles)
-class App {
+class App extends Component {
 
   static propTypes = {
-    path: PropTypes.string.isRequired
+    context: PropTypes.shape({
+      insertCss: PropTypes.func,
+      onSetTitle: PropTypes.func,
+      onSetMeta: PropTypes.func,
+      onPageNotFound: PropTypes.func,
+    }),
+    children: PropTypes.element.isRequired,
+    error: PropTypes.object,
   };
 
-  componentDidMount() {
-    window.addEventListener('popstate', this.handlePopState);
+  static childContextTypes = {
+    insertCss: PropTypes.func.isRequired,
+    onSetTitle: PropTypes.func.isRequired,
+    onSetMeta: PropTypes.func.isRequired,
+    onPageNotFound: PropTypes.func.isRequired,
+  };
+
+  getChildContext() {
+    const context = this.props.context;
+    return {
+      insertCss: context.insertCss || emptyFunction,
+      onSetTitle: context.onSetTitle || emptyFunction,
+      onSetMeta: context.onSetMeta || emptyFunction,
+      onPageNotFound: context.onPageNotFound || emptyFunction,
+    };
+  }
+
+  componentWillMount() {
+    this.removeCss = this.props.context.insertCss(s);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('popstate', this.handlePopState);
-  }
-
-  shouldComponentUpdate(nextProps) {
-    return this.props.path !== nextProps.path;
+    this.removeCss();
   }
 
   render() {
-    let component;
-
-    switch (this.props.path) {
-
-      case '/':
-      case '/about':
-      case '/privacy':
-        let page = AppStore.getPage(this.props.path);
-        component = React.createElement(pages[page.component], page);
-        break;
-
-      case '/contact':
-        component = <ContactPage />;
-        break;
-
-      case '/login':
-        component = <LoginPage />;
-        break;
-
-      case '/register':
-        component = <RegisterPage />;
-        break;
-    }
-
-    return component ? (
+    return !this.props.error ? (
       <div>
         <Header />
-        {component}
+        {this.props.children}
         <Feedback />
         <Footer />
       </div>
-    ) : <NotFoundPage />;
-  }
-
-  handlePopState(event) {
-    AppActions.navigateTo(window.location.pathname, {replace: !!event.state});
+    ) : this.props.children;
   }
 
 }

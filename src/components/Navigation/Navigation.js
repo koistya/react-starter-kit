@@ -1,31 +1,30 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
-import React, { PropTypes } from 'react';
-import classNames from 'classnames';
-import styles from './Navigation.less';
-import withStyles from '../../decorators/withStyles';
-import Link from '../../utils/Link';
+import React, { Component, PropTypes } from 'react';
+import cx from 'classnames';
+import s from './Navigation.scss';
+import withStyles from '../withStyles';
+import Link from '../Link';
 
-@withStyles(styles)
-class Navigation {
+class Navigation extends Component {
 
   static propTypes = {
-    className: PropTypes.string
+    className: PropTypes.string,
   };
 
   render() {
     return (
-      <div className={classNames(this.props.className, 'Navigation')} role="navigation">
-        <a className="Navigation-link" href="/about" onClick={Link.handleClick}>About</a>
-        <a className="Navigation-link" href="/contact" onClick={Link.handleClick}>Contact</a>
-        <span className="Navigation-spacer"> | </span>
-        <a className="Navigation-link" href="/login" onClick={Link.handleClick}>Log in</a>
-        <span className="Navigation-spacer">or</span>
-        <a className="Navigation-link Navigation-link--highlight" href="/register" onClick={Link.handleClick}>Sign up</a>
+      <div className={cx(s.root, this.props.className)} role="navigation">
+        <a className={s.link} href="/about" onClick={Link.handleClick()}>About</a>
+        <a className={s.link} href="/contact" onClick={Link.handleClick()}>Contact</a>
+        <span className={s.spacer}> | </span>
+        <a className={s.link} href="/login" onClick={Link.handleClick()}>Log in</a>
+        <span className={s.spacer}>or</span>
+        <a className={cx(s.link, s.highlight)} href="/register" onClick={Link.handleClick()}>Sign up</a>
       </div>
     );
   }
 
 }
 
-export default Navigation;
+export default withStyles(Navigation, s);

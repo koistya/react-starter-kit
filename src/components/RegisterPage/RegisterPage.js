@@ -1,22 +1,25 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
-import React, { PropTypes } from 'react';
-import withStyles from '../../decorators/withStyles';
-import styles from './RegisterPage.less';
+import React, { Component, PropTypes } from 'react';
+import s from './RegisterPage.scss';
+import withStyles from '../withStyles';
 
-@withStyles(styles)
-class RegisterPage {
+const title = 'New User Registration';
+
+class RegisterPage extends Component {
 
   static contextTypes = {
-    onSetTitle: PropTypes.func.isRequired
+    onSetTitle: PropTypes.func.isRequired,
   };
 
-  render() {
-    let title = 'New User Registration';
+  componentWillMount() {
     this.context.onSetTitle(title);
+  }
+
+  render() {
     return (
-      <div className="RegisterPage">
-        <div className="RegisterPage-container">
+      <div className={s.root}>
+        <div className={s.container}>
           <h1>{title}</h1>
           <p>...</p>
         </div>
@@ -26,4 +29,4 @@ class RegisterPage {
 
 }
 
-export default RegisterPage;
+export default withStyles(RegisterPage, s);

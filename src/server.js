@@ -1,59 +1,50 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
-import 'babel/polyfill';
-import _ from 'lodash';
-import fs from 'fs';
+import 'babel-polyfill';
 import path from 'path';
 import express from 'express';
 import React from 'react';
-import './core/Dispatcher';
-import './stores/AppStore';
-import db from './core/Database';
-import App from './components/App';
+import ReactDOM from 'react-dom/server';
+import Router from './routes';
+import Html from './components/Html';
+import assets from './assets.json';
 
-const server = express();
+const server = global.server = express();
+const port = process.env.PORT || 5000;
+server.set('port', port);
 
-server.set('port', (process.env.PORT || 5000));
+//
+// Register Node.js middleware
+// -----------------------------------------------------------------------------
 server.use(express.static(path.join(__dirname, 'public')));
 
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-server.use('/api/query', require('./api/query'));
+server.use('/api/content', require('./api/content').default);
 
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
-
-// The top-level React component + HTML template for it
-const templateFile = path.join(__dirname, 'templates/index.html');
-const template = _.template(fs.readFileSync(templateFile, 'utf8'));
-
 server.get('*', async (req, res, next) => {
   try {
-    // TODO: Temporary fix #159
-    if (['/', '/about', '/privacy'].indexOf(req.path) !== -1) {
-      await db.getPage(req.path);
-    }
-    let notFound = false;
-    let css = [];
-    let data = {description: ''};
-    let app = (<App
-      path={req.path}
-      context={{
-        onInsertCss: value => css.push(value),
-        onSetTitle: value => data.title = value,
-        onSetMeta: (key, value) => data[key] = value,
-        onPageNotFound: () => notFound = true
-      }} />);
+    let statusCode = 200;
+    const data = { title: '', description: '', css: '', body: '', entry: assets.app.js };
+    const css = [];
+    const context = {
+      insertCss: styles => css.push(styles._getCss()),
+      onSetTitle: value => data.title = value,
+      onSetMeta: (key, value) => data[key] = value,
+      onPageNotFound: () => statusCode = 404,
+    };
 
-    data.body = React.renderToString(app);
-    data.css = css.join('');
-    let html = template(data);
-    if (notFound) {
-      res.status(404);
-    }
-    res.send(html);
+    await Router.dispatch({ path: req.path, context }, (state, component) => {
+      data.body = ReactDOM.renderToString(component);
+      data.css = css.join('');
+    });
+
+    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
+    res.status(statusCode).send('<!doctype html>\n' + html);
   } catch (err) {
     next(err);
   }
@@ -62,11 +53,7 @@ server.get('*', async (req, res, next) => {
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-
-server.listen(server.get('port'), () => {
-  if (process.send) {
-    process.send('online');
-  } else {
-    console.log('The server is running at http://localhost:' + server.get('port'));
-  }
+server.listen(port, () => {
+  /* eslint-disable no-console */
+  console.log(`The server is running at http://localhost:${port}/`);
 });

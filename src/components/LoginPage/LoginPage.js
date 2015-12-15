@@ -1,22 +1,25 @@
 /*! React Starter Kit | MIT License | http://www.reactstarterkit.com/ */
 
-import React, { PropTypes } from 'react';
-import styles from './LoginPage.less';
-import withStyles from '../../decorators/withStyles';
+import React, { Component, PropTypes } from 'react';
+import s from './LoginPage.scss';
+import withStyles from '../withStyles';
 
-@withStyles(styles)
-class LoginPage {
+const title = 'Log In';
+
+class LoginPage extends Component {
 
   static contextTypes = {
-    onSetTitle: PropTypes.func.isRequired
+    onSetTitle: PropTypes.func.isRequired,
   };
 
-  render() {
-    let title = 'Log In';
+  componentWillMount() {
     this.context.onSetTitle(title);
+  }
+
+  render() {
     return (
-      <div className="LoginPage">
-        <div className="LoginPage-container">
+      <div className={s.root}>
+        <div className={s.container}>
           <h1>{title}</h1>
           <p>...</p>
         </div>
@@ -26,4 +29,4 @@ class LoginPage {
 
 }
 
-export default LoginPage;
+export default withStyles(LoginPage, s);
