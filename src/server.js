@@ -15,7 +15,9 @@ import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
 import expressGraphQL from 'express-graphql';
 import jwt from 'jsonwebtoken';
+import React from 'react';
 import ReactDOM from 'react-dom/server';
+import PageContext from 'react-page-context';
 import { match } from 'universal-router';
 import PrettyError from 'pretty-error';
 import passport from './core/passport';
@@ -85,7 +87,7 @@ app.get('*', async (req, res, next) => {
     let css = [];
     let statusCode = 200;
     const template = require('./views/index.jade');
-    const data = { title: '', description: '', css: '', body: '', entry: assets.main.js };
+    const data = { css: '', body: '', entry: assets.main.js };
 
     if (process.env.NODE_ENV === 'production') {
       data.trackingId = analytics.google.trackingId;
@@ -96,13 +98,13 @@ app.get('*', async (req, res, next) => {
       query: req.query,
       context: {
         insertCss: styles => css.push(styles._getCss()),
-        setTitle: value => (data.title = value),
-        setMeta: (key, value) => (data[key] = value),
       },
       render(component, status = 200) {
         css = [];
         statusCode = status;
-        data.body = ReactDOM.renderToString(component);
+        data.body = ReactDOM.renderToString(
+          <PageContext onChange={value => (data.page = value)}>{component}</PageContext>
+        );
         data.css = css.join('');
         return true;
       },

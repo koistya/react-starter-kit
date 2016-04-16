@@ -14,7 +14,7 @@ import s from './Content.scss';
 class Content extends Component {
 
   static contextTypes = {
-    setTitle: PropTypes.func.isRequired,
+    page: PropTypes.func.isRequired,
   };
 
   static propTypes = {
@@ -24,7 +24,7 @@ class Content extends Component {
   };
 
   componentWillMount() {
-    this.context.setTitle(this.props.title);
+    this.context.page({ title: this.props.title });
   }
 
   render() {

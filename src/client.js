@@ -8,33 +8,14 @@
  */
 
 import 'babel-polyfill';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import FastClick from 'fastclick';
 import { match } from 'universal-router';
+import PageContext from 'react-page-context';
 import routes from './routes';
 import Location from './core/Location';
 import { addEventListener, removeEventListener } from './core/DOMUtils';
-
-const context = {
-  insertCss: styles => styles._insertCss(),
-  setTitle: value => (document.title = value),
-  setMeta: (name, content) => {
-    // Remove and create a new <meta /> tag in order to make it work
-    // with bookmarks in Safari
-    const elements = document.getElementsByTagName('meta');
-    Array.from(elements).forEach((element) => {
-      if (element.getAttribute('name') === name) {
-        element.parentNode.removeChild(element);
-      }
-    });
-    const meta = document.createElement('meta');
-    meta.setAttribute('name', name);
-    meta.setAttribute('content', content);
-    document
-      .getElementsByTagName('head')[0]
-      .appendChild(meta);
-  },
-};
 
 // Restore the scroll position if it was saved into the state
 function restoreScrollPosition(state) {
@@ -64,7 +45,7 @@ function render(container, state, component) {
   return new Promise((resolve, reject) => {
     try {
       ReactDOM.render(
-        component,
+        <PageContext>{component}</PageContext>,
         container,
         renderComplete.bind(undefined, state, resolve)
       );
@@ -88,7 +69,9 @@ function run() {
       path: location.pathname,
       query: location.query,
       state: location.state,
-      context,
+      context: {
+        insertCss: styles => styles._insertCss(),
+      },
       render: render.bind(undefined, container, location.state),
     }).catch(err => console.error(err)); // eslint-disable-line no-console
   });

@@ -13,8 +13,8 @@ import s from './Login.scss';
 
 const title = 'Log In';
 
-function Login(props, context) {
-  context.setTitle(title);
+function Login(props, { page }) {
+  page({ title });
   return (
     <div className={s.root}>
       <div className={s.container}>
@@ -115,6 +115,6 @@ function Login(props, context) {
   );
 }
 
-Login.contextTypes = { setTitle: PropTypes.func.isRequired };
+Login.contextTypes = { page: PropTypes.func.isRequired };
 
 export default withStyles(Login, s);

@@ -13,8 +13,8 @@ import s from './Home.scss';
 
 const title = 'React Starter Kit';
 
-function Home({ news }, context) {
-  context.setTitle(title);
+function Home({ news }, { page }) {
+  page({ title });
   return (
     <div className={s.root}>
       <div className={s.container}>
@@ -35,6 +35,7 @@ function Home({ news }, context) {
   );
 }
 
+Home.contextTypes = { page: PropTypes.func.isRequired };
 Home.propTypes = {
   news: PropTypes.arrayOf(PropTypes.shape({
     title: PropTypes.string.isRequired,
@@ -42,6 +43,5 @@ Home.propTypes = {
     contentSnippet: PropTypes.string,
   })).isRequired,
 };
-Home.contextTypes = { setTitle: PropTypes.func.isRequired };
 
 export default withStyles(Home, s);

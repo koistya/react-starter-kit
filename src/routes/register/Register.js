@@ -13,8 +13,8 @@ import s from './Register.scss';
 
 const title = 'New User Registration';
 
-function Register(props, context) {
-  context.setTitle(title);
+function Register(props, { page }) {
+  page({ title });
   return (
     <div className={s.root}>
       <div className={s.container}>
@@ -25,6 +25,6 @@ function Register(props, context) {
   );
 }
 
-Register.contextTypes = { setTitle: PropTypes.func.isRequired };
+Register.contextTypes = { page: PropTypes.func.isRequired };
 
 export default withStyles(Register, s);
