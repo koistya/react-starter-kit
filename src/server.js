@@ -11,22 +11,17 @@ import path from 'path';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-import expressJwt from 'express-jwt';
-import expressGraphQL from 'express-graphql';
-import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import PrettyError from 'pretty-error';
+import createHttpClient from './core/createHttpClient.server';
 import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './routes/error/ErrorPage';
 import errorPageStyle from './routes/error/ErrorPage.css';
-import passport from './core/passport';
 import router from './core/router';
-import models from './data/models';
-import schema from './data/schema';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
-import { port, auth } from './config';
+import { port } from './config';
 
 const app = express();
 
@@ -36,6 +31,12 @@ const app = express();
 // -----------------------------------------------------------------------------
 global.navigator = global.navigator || {};
 global.navigator.userAgent = global.navigator.userAgent || 'all';
+
+const app = express();
+
+if (process.env.NODE_ENV !== 'production') {
+  app.enable('trust proxy', 'loopback');
+}
 
 //
 // Register Node.js middleware
@@ -48,38 +49,21 @@ app.use(bodyParser.json());
 //
 // Authentication
 // -----------------------------------------------------------------------------
-app.use(expressJwt({
-  secret: auth.jwt.secret,
-  credentialsRequired: false,
-  getToken: req => req.cookies.id_token,
-}));
-app.use(passport.initialize());
+app.use((req, res, next) => {
+  if (!req.query.sessionID) {
+    next();
+    return;
+  }
 
-if (__DEV__) {
-  app.enable('trust proxy');
-}
-app.get('/login/facebook',
-  passport.authenticate('facebook', { scope: ['email', 'user_location'], session: false }),
-);
-app.get('/login/facebook/return',
-  passport.authenticate('facebook', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-    const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret, { expiresIn });
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-    res.redirect('/');
-  },
-);
+  res.cookie('sid', req.query.sessionID, {
+    ...(req.query.maxAge ? { maxAge: req.query.maxAge } : {}),
+    httpOnly: true,
+  });
 
-//
-// Register API middleware
-// -----------------------------------------------------------------------------
-app.use('/graphql', expressGraphQL(req => ({
-  schema,
-  graphiql: __DEV__,
-  rootValue: { request: req },
-  pretty: __DEV__,
-})));
+  res.redirect(req.originalUrl
+    .replace(/[?&]sessionID=[^&]+/, '')
+    .replace(/[?&]maxAge=[^&]+/, ''));
+});
 
 //
 // Register server-side rendering middleware
@@ -91,6 +75,7 @@ app.get('*', async (req, res, next) => {
     // Global (context) variables that can be easily accessed from any React component
     // https://facebook.github.io/react/docs/context.html
     const context = {
+      client: createHttpClient(req),
       // Enables critical path CSS rendering
       // https://github.com/kriasoft/isomorphic-style-loader
       insertCss: (...styles) => {
@@ -102,6 +87,7 @@ app.get('*', async (req, res, next) => {
     const route = await router.resolve({
       path: req.path,
       query: req.query,
+      client: context.client,
     });
 
     if (route.redirect) {
@@ -155,10 +141,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-/* eslint-disable no-console */
-models.sync().catch(err => console.error(err.stack)).then(() => {
-  app.listen(port, () => {
-    console.log(`The server is running at http://localhost:${port}/`);
-  });
+app.listen(port, () => {
+  // eslint-disable-next-line no-console
+  console.log(`The server is running at http://localhost:${port}/`);
 });
-/* eslint-enable no-console */
