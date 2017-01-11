@@ -15,7 +15,7 @@ function createHttpClient() {
     fetch(url, options) {
       if (url.startsWith('/graphql')) {
         return self.fetch.call(self, `${apiUrl}${url}`, {
-          ...(options || {}),
+          ...options,
           credentials: 'include',
         });
       }

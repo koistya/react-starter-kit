@@ -27,10 +27,10 @@ function createHttpClient({ cookie }) {
 
       if (url.startsWith('/graphql')) {
         return fetch(`${apiUrl}${url}`, {
-          ...(options || {}),
+          ...options,
           credentials: 'include',
           headers: {
-            ...((options && options.headers) || {}),
+            ...(options && options.headers),
             Cookie: cookie,
           },
         });
@@ -40,7 +40,7 @@ function createHttpClient({ cookie }) {
         ...(options || {}),
         credentials: 'include',
         headers: {
-          ...((options && options.headers) || {}),
+          ...(options && options.headers),
           Cookie: this.cookie,
         },
       });
